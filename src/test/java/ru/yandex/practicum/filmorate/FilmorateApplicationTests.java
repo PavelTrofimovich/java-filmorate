@@ -51,7 +51,7 @@ class FilmorateApplicationTests {
 
 	@Test
 	void validationTestUserEmptyName() {
-
+		userController = new UserController();
 		user = new User();
 		user.setEmail("mail@ya.ru");
 		user.setLogin("Login");
