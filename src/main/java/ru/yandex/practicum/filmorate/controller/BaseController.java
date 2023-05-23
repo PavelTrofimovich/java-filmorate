@@ -15,7 +15,7 @@ public abstract class BaseController<T extends BaseModel> {
     public T createModel(T model) {
         model.setId(++id);
         data.put(model.getId(), model);
-         return model;
+        return model;
     }
 
     public ArrayList<T> getDataList() {
@@ -24,8 +24,8 @@ public abstract class BaseController<T extends BaseModel> {
 
     public void updateModel(T model) {
         Integer modelId = model.getId();
-        if(!data.containsKey(modelId)) {
-            //log.debug("Unknown id");
+        if (!data.containsKey(modelId)) {
+            log.debug("Unknown id");
             throw new ValidationException("Unknown id");
         }
         data.remove(modelId);
