@@ -28,8 +28,6 @@ public abstract class BaseController<T extends BaseModel> {
             log.debug("Unknown id");
             throw new ValidationException("Unknown id");
         }
-        data.remove(modelId);
         data.put(modelId, model);
     }
-
 }

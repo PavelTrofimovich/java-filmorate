@@ -23,9 +23,7 @@ public class UserController extends BaseController<User> {
     @PostMapping
     public User addNewUser(@Valid @RequestBody User user) {
         validator(user);
-        if (user.getName() == null) {
-            user.setName(user.getLogin());
-        }
+        nameCheck(user);
         log.info("Creating user {}", user);
         return super.createModel(user);
     }
@@ -33,10 +31,8 @@ public class UserController extends BaseController<User> {
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
         validator(user);
-        if (user.getName() == null) {
-            user.setName(user.getLogin());
-        }
-        updateModel(user);
+        nameCheck(user);
+        super.updateModel(user);
         log.info("Update user {}", user);
         return user;
     }
@@ -46,5 +42,14 @@ public class UserController extends BaseController<User> {
             log.debug("Validation birthday error");
             throw new ValidationException("Validation birthday error");
         }
+        if (user.getLogin().contains(" ")) {
+            log.debug("Validation login error");
+            throw new ValidationException("Validation login error");
+        }
+    }
+
+    private void nameCheck(User user) {
+        if (user.getName() == null)
+            user.setName(user.getLogin());
     }
 }

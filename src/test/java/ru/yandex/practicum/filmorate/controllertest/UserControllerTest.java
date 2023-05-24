@@ -21,4 +21,13 @@ public class UserControllerTest {
         user.setBirthday(LocalDate.of(2077, 10, 10));
         Assertions.assertThrows(ValidationException.class, () -> userController.addNewUser(user));
     }
+
+    @Test
+    void validationTestLogin() {
+        userController = new UserController();
+        user = new User("mail@ya.ru", "log", "name", LocalDate.of(1990, 10, 10));
+        Assertions.assertDoesNotThrow(() -> userController.addNewUser(user));
+        user.setLogin("log    ");
+        Assertions.assertThrows(ValidationException.class, () -> userController.addNewUser(user));
+    }
 }
