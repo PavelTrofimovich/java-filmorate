@@ -31,7 +31,7 @@ public class FilmService {
     }
 
     public Film getById(Integer id) {
-        if(filmStorage.getById(id) == null) {
+        if (filmStorage.getById(id) == null) {
             throw new NotFoundException("Нету");
         }
         return filmStorage.getById(id);
@@ -61,7 +61,7 @@ public class FilmService {
     public List<Film> getPopularFilms(Integer count) {
         return filmStorage.getAllFilm()
                 .stream()
-                .sorted((film1,film2) -> film2.getLike() - film1.getLike())
+                .sorted((film1, film2) -> film2.getLike() - film1.getLike())
                 .limit(count).collect(Collectors.toList());
     }
 }

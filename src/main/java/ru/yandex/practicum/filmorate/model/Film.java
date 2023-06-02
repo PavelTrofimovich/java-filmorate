@@ -35,12 +35,16 @@ public class Film extends BaseModel {
     public void addLike(Integer id) {
         if (id != null && id > 0) {
             likeUser.add(id);
-        } else throw new ValidationException("id = null or id < 0");
+        } else {
+            throw new ValidationException("id = null or id < 0");
+        }
     }
 
     public void removeLike(Integer id) {
         if (likeUser.contains(id)) {
             likeUser.remove(id);
-        } else throw new NotFoundException("Like not found");
+        } else {
+            throw new NotFoundException("Like not found");
+        }
     }
 }

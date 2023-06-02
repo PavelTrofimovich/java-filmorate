@@ -18,18 +18,18 @@ public class FilmControllerTest {
 
     @Test
     void validationTestFilmDate() {
-        filmController = new FilmController(new FilmService(new InMemoryFilmStorage(),new InMemoryUserStorage()));
+        filmController = new FilmController(new FilmService(new InMemoryFilmStorage(), new InMemoryUserStorage()));
         film = Film.builder()
                 .name("name")
                 .description("description")
-                .releaseDate(LocalDate.of(1895,12,28))
+                .releaseDate(LocalDate.of(1895, 12, 28))
                 .duration(12)
                 .build();
         Assertions.assertDoesNotThrow(() -> filmController.addNewFilm(film));
         film = Film.builder()
                 .name("name")
                 .description("description")
-                .releaseDate(LocalDate.of(1894,12,28))
+                .releaseDate(LocalDate.of(1894, 12, 28))
                 .duration(12)
                 .build();
         Assertions.assertThrows(ValidationException.class, () -> filmController.addNewFilm(film));
