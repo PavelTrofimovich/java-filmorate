@@ -28,12 +28,12 @@ public class Film extends BaseModel {
     private Integer duration;
     private Set<Integer> likeUser = new HashSet<>();
 
-    public Integer getLike(){
+    public Integer getLike() {
         return likeUser.size();
     }
 
     public void addLike(Integer id) {
-        if(id != null && id > 0) {
+        if (id != null && id > 0) {
             likeUser.add(id);
         } else throw new ValidationException("id = null or id < 0");
     }
