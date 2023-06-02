@@ -32,13 +32,13 @@ public class User extends BaseModel {
     private final Set<Integer> friends = new HashSet<>();
 
     public void addFriend(Integer id) {
-        if(id != null && id > 0) {
+        if (id != null && id > 0) {
             friends.add(id);
         } else throw new ValidationException("id = null or id < 0");
     }
 
     public void removeFriend(Integer id) {
-        if(friends.contains(id)) {
+        if (friends.contains(id)) {
             friends.remove(id);
         } else throw new NotFoundException("Friend not found");
     }
