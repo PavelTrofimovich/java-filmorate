@@ -3,9 +3,11 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.User.UserStorage;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,10 +23,12 @@ public class UserService {
     }
 
     public User createUser(User user) {
+        validation(user);
         return userStorage.createUser(user);
     }
 
     public User updateUser(User user) {
+        validation(user);
         return userStorage.updateUser(user);
     }
 
@@ -49,18 +53,29 @@ public class UserService {
     }
 
     public List<User> getFriends(Integer id) {
-        return userStorage.getAllUser().stream()
-                .filter(user -> user.getFriends().contains(id))
-                .collect(Collectors.toList());
+        User user = userStorage.getById(id);
+        return user.getFriends().stream().map(this::getById).collect(Collectors.toList());
     }
 
     public List<User> getCommonFriends(Integer userId1, Integer userId2) {
-        List<User> listCommonFriend = new ArrayList<>();
-        for (Integer id : userStorage.getById(userId1).getFriends()) {
-            if (userStorage.getById(userId2).getFriends().contains(id)) {
-                listCommonFriend.add(userStorage.getById(id));
-            }
+        User user1 = userStorage.getById(userId1);
+        User user2 = userStorage.getById(userId2);
+        return user1.getFriends().stream()
+                .filter(id -> user2.getFriends().contains(id))
+                .map(this::getById).collect(Collectors.toList());
+    }
+
+    private void validation(User user) {
+        if (user.getBirthday().isAfter(LocalDate.now())) {
+            log.debug("Validation birthday error");
+            throw new ValidationException("Validation birthday error");
         }
-        return listCommonFriend;
+        if (user.getLogin().contains(" ")) {
+            log.debug("Validation login error");
+            throw new ValidationException("Validation login error");
+        }
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
     }
 }

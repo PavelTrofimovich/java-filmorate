@@ -8,5 +8,5 @@ import javax.validation.constraints.Positive;
 public abstract class BaseModel {
 
     @Positive
-    Integer id;
+    private Integer id;
 }
