@@ -19,7 +19,7 @@ public class DbMpaStorage implements MpaStorage {
     @Override
     public List<Mpa> getAllMpa() {
         String sql = "SELECT * FROM rating_mpa ORDER BY mpa_id";
-        return jdbc.query(sql,this::mapRowToMpa);
+        return jdbc.query(sql, this::mapRowToMpa);
     }
 
     @Override

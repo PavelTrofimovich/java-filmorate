@@ -68,13 +68,13 @@ public class FilmService {
     public void addLike(Integer filmId, Integer userId) {
         checkExistFilm(filmId);
         checkExistUser(userId);
-        likesStorage.addLike(filmId,userId);
+        likesStorage.addLike(filmId, userId);
     }
 
     public void deleteLike(Integer filmId, Integer userId) {
         checkExistFilm(filmId);
         checkExistUser(userId);
-        likesStorage.deleteLike(filmId,userId);
+        likesStorage.deleteLike(filmId, userId);
     }
 
     public List<Film> getPopularFilms(Integer count) {
@@ -105,7 +105,7 @@ public class FilmService {
         }
     }
 
-    private Film checkExistFilm (Integer id) {
+    private Film checkExistFilm(Integer id) {
         try {
             return filmStorage.getById(id);
         } catch (EmptyResultDataAccessException e) {

@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 @Component
 @AllArgsConstructor
-public class DbUserStorage implements UserStorage{
+public class DbUserStorage implements UserStorage {
     private final JdbcTemplate jdbc;
 
     @Override
