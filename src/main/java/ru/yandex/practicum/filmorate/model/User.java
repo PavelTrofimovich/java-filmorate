@@ -12,7 +12,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -31,15 +33,13 @@ public class User extends BaseModel {
     private LocalDate birthday = LocalDate.now();
     private final Set<Integer> friends = new HashSet<>();
 
-    public void addFriend(Integer id) {
-        if (id != null && id > 0) {
-            friends.add(id);
-        } else throw new ValidationException("id = null or id < 0");
-    }
-
-    public void removeFriend(Integer id) {
-        if (friends.contains(id)) {
-            friends.remove(id);
-        } else throw new NotFoundException("Friend not found");
+    public Map<String, Object> toMap() {
+        Map<String, Object> values = new HashMap<>();
+        values.put("user_id", getId());
+        values.put("email", email);
+        values.put("login", login);
+        values.put("name_user", name);
+        values.put("birthday", birthday);
+        return values;
     }
 }

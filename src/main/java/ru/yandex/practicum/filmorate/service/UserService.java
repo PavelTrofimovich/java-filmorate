@@ -2,10 +2,13 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.User.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.friends.FriendsStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,6 +19,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
     private final UserStorage userStorage;
+    private final FriendsStorage friendsStorage;
 
     public List<User> getAllUsers() {
         return userStorage.getAllUser();
@@ -28,39 +32,39 @@ public class UserService {
 
     public User updateUser(User user) {
         validation(user);
+        checkExistUser(user.getId());
         return userStorage.updateUser(user);
     }
 
     public User getById(Integer id) {
+        checkExistUser(id);
         return userStorage.getById(id);
     }
 
-    public User addFriends(Integer userId1, Integer userId2) {
-        User user1 = userStorage.getById(userId1);
-        User user2 = userStorage.getById(userId2);
-        user1.addFriend(userId2);
-        user2.addFriend(userId1);
-        return user1;
+    public void addFriends(Integer userId1, Integer userId2) {
+        checkExistUser(userId1);
+        checkExistUser(userId2);
+        friendsStorage.addFriend(userId1, userId2);
     }
 
-    public User removeFriend(Integer userId1, Integer userId2) {
-        User user1 = userStorage.getById(userId1);
-        User user2 = userStorage.getById(userId2);
-        user1.removeFriend(userId2);
-        user2.removeFriend(userId1);
-        return user1;
+    public void removeFriend(Integer userId1, Integer userId2) {
+        checkExistUser(userId1);
+        checkExistUser(userId2);
+        friendsStorage.deleteFriend(userId1, userId2);
     }
 
     public List<User> getFriends(Integer id) {
-        User user = userStorage.getById(id);
-        return user.getFriends().stream().map(this::getById).collect(Collectors.toList());
+        checkExistUser(id);
+        return friendsStorage.getFriends(id).stream().mapToInt(Integer::valueOf)
+                .mapToObj(this::getById)
+                .collect(Collectors.toList());
     }
 
     public List<User> getCommonFriends(Integer userId1, Integer userId2) {
-        User user1 = userStorage.getById(userId1);
-        User user2 = userStorage.getById(userId2);
-        return user1.getFriends().stream()
-                .filter(id -> user2.getFriends().contains(id))
+        checkExistUser(userId1);
+        checkExistUser(userId2);
+        return friendsStorage.getFriends(userId1).stream()
+                .filter(id -> friendsStorage.getFriends(userId2).contains(id))
                 .map(this::getById).collect(Collectors.toList());
     }
 
@@ -75,6 +79,15 @@ public class UserService {
         }
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
+        }
+    }
+
+    private void checkExistUser(Integer id) {
+        try {
+            userStorage.getById(id);
+        } catch (EmptyResultDataAccessException exception) {
+            log.debug("Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
     }
 }

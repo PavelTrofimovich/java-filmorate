@@ -9,7 +9,9 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -26,25 +28,16 @@ public class Film extends BaseModel {
     private LocalDate releaseDate;
     @Positive
     private Integer duration;
-    private Set<Integer> likeUser = new HashSet<>();
+    private Mpa mpa;
+    private Set<Genre> genres = new HashSet<>();
 
-    public Integer getLike() {
-        return likeUser.size();
-    }
-
-    public void addLike(Integer id) {
-        if (id != null && id > 0) {
-            likeUser.add(id);
-        } else {
-            throw new ValidationException("id = null or id < 0");
-        }
-    }
-
-    public void removeLike(Integer id) {
-        if (likeUser.contains(id)) {
-            likeUser.remove(id);
-        } else {
-            throw new NotFoundException("Like not found");
-        }
+    public Map<String, Object> toMap() {
+        Map<String, Object> values = new HashMap<>();
+        values.put("name_film", name);
+        values.put("description", description);
+        values.put("release_date", releaseDate);
+        values.put("duration", duration);
+        values.put("mpa_id", mpa.getId());
+        return values;
     }
 }
