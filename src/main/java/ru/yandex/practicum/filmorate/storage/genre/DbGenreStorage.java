@@ -17,12 +17,11 @@ import static java.lang.String.format;
 @AllArgsConstructor
 public class DbGenreStorage implements GenreStorage {
     private final JdbcTemplate jdbc;
-    private final Mappers mappers;
 
     @Override
     public List<Genre> getAllGenres() {
         String sql = "SELECT * FROM genres ORDER BY genre_id";
-        return jdbc.query(sql, mappers::mapRowToGenre);
+        return jdbc.query(sql, Mappers::mapRowToGenre);
     }
 
     @Override
@@ -30,7 +29,7 @@ public class DbGenreStorage implements GenreStorage {
         String sql = "SELECT * FROM genres WHERE genre_id = ?";
         SqlRowSet srs = jdbc.queryForRowSet(sql, id);
         if (srs.next()) {
-            return jdbc.queryForObject(sql, mappers::mapRowToGenre, id);
+            return jdbc.queryForObject(sql, Mappers::mapRowToGenre, id);
         } else {
             throw new NotFoundException("Жанр не найден");
         }
@@ -43,7 +42,9 @@ public class DbGenreStorage implements GenreStorage {
         for (Genre genre : genres) {
             stringJoiner.add("(" + filmId + ", " + genre.getId() + ")");
         }
-        genres.forEach(genre -> jdbc.update(sql + stringJoiner.toString()));
+        if (!stringJoiner.toString().isBlank()) {
+            jdbc.update(sql + stringJoiner);
+        }
     }
 
     @Override
@@ -60,26 +61,27 @@ public class DbGenreStorage implements GenreStorage {
                 + "LEFT OUTER JOIN genres AS g ON f.genre_id = g.genre_id "
                 + "WHERE f.film_id=%d "
                 + "ORDER BY g.genre_id";
-        return new HashSet<>(jdbc.query(format(sql, filmId), mappers::mapRowToGenre));
+        return new HashSet<>(jdbc.query(format(sql, filmId), Mappers::mapRowToGenre));
     }
 
     @Override
     public void findAllGenres(List<Film> filmList) {
-        String sql = "SELECT * "
-                + "FROM film_genres AS f "
-                + "LEFT OUTER JOIN genres AS g ON f.genre_id = g.genre_id";
         Map<Integer, Set<Genre>> map = new HashMap<>();
+        StringJoiner stringJoiner = new StringJoiner(", ");
         for (Film film : filmList) {
+            stringJoiner.add(film.getId().toString());
             map.put(film.getId(), new HashSet<Genre>());
         }
+        String sql = "SELECT * "
+                + "FROM film_genres AS f "
+                + "LEFT OUTER JOIN genres AS g ON f.genre_id = g.genre_id "
+                + "WHERE film_id IN (" + stringJoiner + ");";
         SqlRowSet rs = jdbc.queryForRowSet(sql);
         while (rs.next()) {
             int id = rs.getInt("film_id");
-            if (map.containsKey(id)) {
-                Genre genre = new Genre(rs.getString("name_genre"));
-                genre.setId(rs.getInt("genre_id"));
-                map.get(id).add(genre);
-            }
+            Genre genre = new Genre(rs.getString("name_genre"));
+            genre.setId(rs.getInt("genre_id"));
+            map.get(id).add(genre);
         }
         for (Film film : filmList) {
             film.setGenres(map.get(film.getId()));

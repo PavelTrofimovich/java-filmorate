@@ -14,12 +14,11 @@ import java.util.List;
 @AllArgsConstructor
 public class DbMpaStorage implements MpaStorage {
     private final JdbcTemplate jdbc;
-    private final Mappers mappers;
 
     @Override
     public List<Mpa> getAllMpa() {
         String sql = "SELECT * FROM rating_mpa ORDER BY mpa_id";
-        return jdbc.query(sql, mappers::mapRowToMpa);
+        return jdbc.query(sql, Mappers::mapRowToMpa);
     }
 
     @Override
@@ -27,7 +26,7 @@ public class DbMpaStorage implements MpaStorage {
         String sql = "SELECT * FROM rating_mpa WHERE mpa_id = ?";
         SqlRowSet srs = jdbc.queryForRowSet(sql, id);
         if (srs.next()) {
-            return jdbc.queryForObject(sql, mappers::mapRowToMpa, id);
+            return jdbc.queryForObject(sql, Mappers::mapRowToMpa, id);
         } else {
             throw new NotFoundException("Рейтинг не найден!");
         }

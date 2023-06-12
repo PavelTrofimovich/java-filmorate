@@ -12,7 +12,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DbFriendsStorage implements FriendsStorage {
     private final JdbcTemplate jdbc;
-    private final Mappers mappers;
 
     @Override
     public void addFriend(Integer userId, Integer otherId) {
@@ -32,7 +31,7 @@ public class DbFriendsStorage implements FriendsStorage {
                 + "FROM users "
                 + "WHERE user_id IN"
                 + "(SELECT other_id FROM friends WHERE user_id = ?)";
-        return jdbc.query(sql, mappers::mapRowToUser, user);
+        return jdbc.query(sql, Mappers::mapRowToUser, user);
     }
 
     @Override
@@ -41,6 +40,6 @@ public class DbFriendsStorage implements FriendsStorage {
                 + "FROM users WHERE user_id IN"
                 + "(SELECT other_id FROM friends WHERE user_id = ? "
                 + "AND other_id IN (SELECT other_id FROM friends WHERE user_id = ?))";
-        return jdbc.query(sql, mappers::mapRowToUser, user1, user2);
+        return jdbc.query(sql, Mappers::mapRowToUser, user1, user2);
     }
 }

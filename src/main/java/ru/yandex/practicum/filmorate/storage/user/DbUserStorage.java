@@ -15,7 +15,6 @@ import java.util.Map;
 @AllArgsConstructor
 public class DbUserStorage implements UserStorage {
     private final JdbcTemplate jdbc;
-    private final Mappers mappers;
 
     @Override
     public User createUser(User user) {
@@ -29,7 +28,7 @@ public class DbUserStorage implements UserStorage {
     @Override
     public ArrayList<User> getAllUser() {
         String sql = "SELECT * FROM users";
-        return new ArrayList<>(jdbc.query(sql, mappers::mapRowToUser));
+        return new ArrayList<>(jdbc.query(sql, Mappers::mapRowToUser));
     }
 
     @Override
@@ -42,7 +41,7 @@ public class DbUserStorage implements UserStorage {
     @Override
     public User getById(Integer id) {
         String sql = "SELECT * FROM users WHERE user_id = ?";
-        return jdbc.queryForObject(sql, mappers::mapRowToUser, id);
+        return jdbc.queryForObject(sql, Mappers::mapRowToUser, id);
     }
 
     public Map<String, Object> toMap(User user) {

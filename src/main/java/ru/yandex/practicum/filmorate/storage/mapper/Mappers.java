@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.mapper;
 
-import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -10,9 +9,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
-@Component
 public class Mappers {
-    public Film mapRowToFilm(ResultSet rs, int rowNum) throws SQLException {
+    public static Film mapRowToFilm(ResultSet rs, int rowNum) throws SQLException {
         Integer id = rs.getInt("film_id");
         String name = rs.getString("name_film");
         String description = rs.getString("description");
@@ -33,7 +31,7 @@ public class Mappers {
         return film;
     }
 
-    public User mapRowToUser(ResultSet rs, int rowNum) throws SQLException {
+    public static User mapRowToUser(ResultSet rs, int rowNum) throws SQLException {
         Integer id = rs.getInt("user_id");
         String email = rs.getString("email");
         String login = rs.getString("login");
@@ -49,13 +47,13 @@ public class Mappers {
         return user;
     }
 
-    public Genre mapRowToGenre(ResultSet rs, int rowNum) throws SQLException {
+    public static Genre mapRowToGenre(ResultSet rs, int rowNum) throws SQLException {
         Genre genre = new Genre(rs.getString("name_genre"));
         genre.setId(rs.getInt("genre_id"));
         return genre;
     }
 
-    public Mpa mapRowToMpa(ResultSet rs, int rowNum) throws SQLException {
+    public static Mpa mapRowToMpa(ResultSet rs, int rowNum) throws SQLException {
         int id = rs.getInt("mpa_id");
         String name = rs.getString("name_mpa");
         Mpa mpa = new Mpa(name);

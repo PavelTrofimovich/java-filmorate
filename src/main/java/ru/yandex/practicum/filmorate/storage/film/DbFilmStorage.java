@@ -16,7 +16,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class DbFilmStorage implements FilmStorage {
     private final JdbcTemplate jdbc;
-    private final Mappers mappers;
 
     @Override
     public Film createFilm(Film film) {
@@ -30,7 +29,7 @@ public class DbFilmStorage implements FilmStorage {
     @Override
     public ArrayList<Film> getAllFilm() {
         String sql = "SELECT * FROM films JOIN rating_mpa AS mpa ON mpa.mpa_id = films.mpa_id";
-        return new ArrayList<>(jdbc.query(sql, mappers::mapRowToFilm));
+        return new ArrayList<>(jdbc.query(sql, Mappers::mapRowToFilm));
     }
 
     @Override
@@ -45,7 +44,7 @@ public class DbFilmStorage implements FilmStorage {
     @Override
     public Film getById(Integer id) {
         String sql = "SELECT * FROM films JOIN rating_mpa AS mpa ON mpa.mpa_id = films.mpa_id WHERE film_id = ?";
-        return jdbc.queryForObject(sql, mappers::mapRowToFilm, id);
+        return jdbc.queryForObject(sql, Mappers::mapRowToFilm, id);
     }
 
     @Override
@@ -57,7 +56,7 @@ public class DbFilmStorage implements FilmStorage {
                 " ON likes.film_id = films.film_id " +
                 " JOIN rating_mpa AS r ON r.mpa_id = films.mpa_id " +
                 " ORDER BY like_count DESC LIMIT ? ;";
-        return jdbc.query(sql, mappers::mapRowToFilm, count);
+        return jdbc.query(sql, Mappers::mapRowToFilm, count);
     }
 
     private Map<String, Object> toMap(Film film) {
