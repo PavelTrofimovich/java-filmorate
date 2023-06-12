@@ -30,6 +30,7 @@ public class DbFilmStorageTest {
     @BeforeEach
     public void beforeEach() {
         mpa.setId(1);
+        mpa.setName("G");
         film = Film.builder()
                 .name("name")
                 .description("description")
@@ -68,5 +69,6 @@ public class DbFilmStorageTest {
         dbFilmStorage.createFilm(film);
         Film filmActual = dbFilmStorage.getById(1);
         assertEquals(film, filmActual);
+
     }
 }
