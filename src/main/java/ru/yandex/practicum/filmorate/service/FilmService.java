@@ -7,15 +7,14 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.likes.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -51,17 +50,13 @@ public class FilmService {
 
     public List<Film> getAllFilms() {
         List<Film> films = filmStorage.getAllFilm();
-        films.forEach(film -> {
-            film.setGenres(genreStorage.findGenres(film.getId()));
-            film.setMpa(mpaStorage.getMpaById(film.getMpa().getId()));
-        });
+        genreStorage.findAllGenres(films);
         return films;
     }
 
     public Film getById(Integer id) {
         Film filmReturn = checkExistFilm(id);
         filmReturn.setGenres(genreStorage.findGenres(id));
-        filmReturn.setMpa(mpaStorage.getMpaById(filmReturn.getMpa().getId()));
         return filmReturn;
     }
 
@@ -78,14 +73,8 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilms(Integer count) {
-        List<Film> result = filmStorage.getAllFilm().stream()
-                .sorted(this::comparator)
-                .limit(count).collect(Collectors.toCollection(LinkedList::new));
-
-        result.forEach(film -> {
-            film.setGenres(genreStorage.findGenres(film.getId()));
-            film.setMpa(mpaStorage.getMpaById(film.getMpa().getId()));
-        });
+        List<Film> result = filmStorage.getPopularFilm(count);
+        genreStorage.findAllGenres(result);
         return result;
     }
 
@@ -112,10 +101,5 @@ public class FilmService {
             log.debug("Фильм не найден");
             throw new NotFoundException("Фильм не найден");
         }
-    }
-
-    private int comparator(Film film, Film film2) {
-        return Integer.compare(likesStorage.getLikes(film2.getId()).size(),
-                likesStorage.getLikes(film.getId()).size());
     }
 }

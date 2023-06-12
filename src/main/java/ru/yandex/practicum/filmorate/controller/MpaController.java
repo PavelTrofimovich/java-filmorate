@@ -20,11 +20,13 @@ public class MpaController {
 
     @GetMapping
     public List<Mpa> getAllMpa() {
+        log.info("Запрос на получение всех рангов MPAA");
         return mpaService.getAllGenre();
     }
 
     @GetMapping("/{id}")
     public Mpa getMpaById(@PathVariable Integer id) {
+        log.info("Ранг MPAA с id {} получен", id);
         return mpaService.getById(id);
     }
 }

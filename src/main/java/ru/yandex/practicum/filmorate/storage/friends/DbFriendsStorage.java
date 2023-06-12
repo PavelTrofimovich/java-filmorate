@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.storage.friends;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.mapper.Mappers;
 
 import java.util.List;
 
@@ -10,6 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DbFriendsStorage implements FriendsStorage {
     private final JdbcTemplate jdbc;
+    private final Mappers mappers;
 
     @Override
     public void addFriend(Integer userId, Integer otherId) {
@@ -24,8 +27,20 @@ public class DbFriendsStorage implements FriendsStorage {
     }
 
     @Override
-    public List<Integer> getFriends(Integer userId) {
-        String sql = "SELECT other_id FROM friends WHERE user_id = ?";
-        return jdbc.queryForList(sql, Integer.class, userId);
+    public List<User> getFriends(Integer user) {
+        String sql = "SELECT *"
+                + "FROM users "
+                + "WHERE user_id IN"
+                + "(SELECT other_id FROM friends WHERE user_id = ?)";
+        return jdbc.query(sql, mappers::mapRowToUser, user);
+    }
+
+    @Override
+    public List<User> getCommonFriends(Integer user1, Integer user2) {
+        String sql = "SELECT *"
+                + "FROM users WHERE user_id IN"
+                + "(SELECT other_id FROM friends WHERE user_id = ? "
+                + "AND other_id IN (SELECT other_id FROM friends WHERE user_id = ?))";
+        return jdbc.query(sql, mappers::mapRowToUser, user1, user2);
     }
 }

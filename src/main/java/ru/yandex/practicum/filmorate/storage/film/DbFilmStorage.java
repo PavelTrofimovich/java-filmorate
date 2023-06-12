@@ -5,31 +5,32 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.mapper.Mappers;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
 public class DbFilmStorage implements FilmStorage {
     private final JdbcTemplate jdbc;
+    private final Mappers mappers;
 
     @Override
     public Film createFilm(Film film) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbc)
                 .withTableName("films")
                 .usingGeneratedKeyColumns("film_id");
-        film.setId(simpleJdbcInsert.executeAndReturnKey(film.toMap()).intValue());
+        film.setId(simpleJdbcInsert.executeAndReturnKey(toMap(film)).intValue());
         return film;
     }
 
     @Override
     public ArrayList<Film> getAllFilm() {
-        String sql = "SELECT * FROM films";
-        return new ArrayList<>(jdbc.query(sql, this::mapRowToFilm));
+        String sql = "SELECT * FROM films JOIN rating_mpa AS mpa ON mpa.mpa_id = films.mpa_id";
+        return new ArrayList<>(jdbc.query(sql, mappers::mapRowToFilm));
     }
 
     @Override
@@ -43,27 +44,29 @@ public class DbFilmStorage implements FilmStorage {
 
     @Override
     public Film getById(Integer id) {
-        String sql = "SELECT * FROM films WHERE film_id = ?";
-        return jdbc.queryForObject(sql, this::mapRowToFilm, id);
+        String sql = "SELECT * FROM films JOIN rating_mpa AS mpa ON mpa.mpa_id = films.mpa_id WHERE film_id = ?";
+        return jdbc.queryForObject(sql, mappers::mapRowToFilm, id);
     }
 
-    private Film mapRowToFilm(ResultSet rs, int rowNum) throws SQLException {
-        Integer id = rs.getInt("film_id");
-        String name = rs.getString("name_film");
-        String description = rs.getString("description");
-        LocalDate releaseDate = rs.getDate("release_date").toLocalDate();
-        int duration = rs.getInt("duration");
-        int mpaId = rs.getInt("mpa_id");
-        Mpa mpa = new Mpa();
-        mpa.setId(mpaId);
-        Film film = Film.builder()
-                .name(name)
-                .description(description)
-                .releaseDate(releaseDate)
-                .duration(duration)
-                .mpa(mpa)
-                .build();
-        film.setId(id);
-        return film;
+    @Override
+    public List<Film> getPopularFilm(Integer count) {
+        String sql = "SELECT * FROM films" +
+                " LEFT JOIN (SELECT film_id, COUNT(*) AS like_count" +
+                " FROM likes " +
+                " GROUP BY film_id) likes " +
+                " ON likes.film_id = films.film_id " +
+                " JOIN rating_mpa AS r ON r.mpa_id = films.mpa_id " +
+                " ORDER BY like_count DESC LIMIT ? ;";
+        return jdbc.query(sql, mappers::mapRowToFilm, count);
+    }
+
+    private Map<String, Object> toMap(Film film) {
+        Map<String, Object> values = new HashMap<>();
+        values.put("name_film", film.getName());
+        values.put("description", film.getDescription());
+        values.put("release_date", film.getReleaseDate());
+        values.put("duration", film.getDuration());
+        values.put("mpa_id", film.getMpa().getId());
+        return values;
     }
 }

@@ -5,30 +5,31 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.mapper.Mappers;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 @AllArgsConstructor
 public class DbUserStorage implements UserStorage {
     private final JdbcTemplate jdbc;
+    private final Mappers mappers;
 
     @Override
     public User createUser(User user) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbc)
                 .withTableName("users")
                 .usingGeneratedKeyColumns("user_id");
-        user.setId(simpleJdbcInsert.executeAndReturnKey(user.toMap()).intValue());
+        user.setId(simpleJdbcInsert.executeAndReturnKey(toMap(user)).intValue());
         return user;
     }
 
     @Override
     public ArrayList<User> getAllUser() {
         String sql = "SELECT * FROM users";
-        return new ArrayList<>(jdbc.query(sql, this::mapRowToUser));
+        return new ArrayList<>(jdbc.query(sql, mappers::mapRowToUser));
     }
 
     @Override
@@ -41,22 +42,16 @@ public class DbUserStorage implements UserStorage {
     @Override
     public User getById(Integer id) {
         String sql = "SELECT * FROM users WHERE user_id = ?";
-        return jdbc.queryForObject(sql, this::mapRowToUser, id);
+        return jdbc.queryForObject(sql, mappers::mapRowToUser, id);
     }
 
-    private User mapRowToUser(ResultSet rs, int rowNum) throws SQLException {
-        Integer id = rs.getInt("user_id");
-        String email = rs.getString("email");
-        String login = rs.getString("login");
-        String name = rs.getString("name_user");
-        LocalDate birthday = rs.getDate("birthday").toLocalDate();
-        User user = User.builder()
-                .email(email)
-                .login(login)
-                .name(name)
-                .birthday(birthday)
-                .build();
-        user.setId(id);
-        return user;
+    public Map<String, Object> toMap(User user) {
+        Map<String, Object> values = new HashMap<>();
+        values.put("user_id", user.getId());
+        values.put("email", user.getEmail());
+        values.put("login", user.getLogin());
+        values.put("name_user", user.getName());
+        values.put("birthday", user.getBirthday());
+        return values;
     }
 }

@@ -7,12 +7,11 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.storage.friends.FriendsStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -55,17 +54,13 @@ public class UserService {
 
     public List<User> getFriends(Integer id) {
         checkExistUser(id);
-        return friendsStorage.getFriends(id).stream().mapToInt(Integer::valueOf)
-                .mapToObj(this::getById)
-                .collect(Collectors.toList());
+        return friendsStorage.getFriends(id);
     }
 
     public List<User> getCommonFriends(Integer userId1, Integer userId2) {
         checkExistUser(userId1);
         checkExistUser(userId2);
-        return friendsStorage.getFriends(userId1).stream()
-                .filter(id -> friendsStorage.getFriends(userId2).contains(id))
-                .map(this::getById).collect(Collectors.toList());
+        return friendsStorage.getCommonFriends(userId1, userId2);
     }
 
     private void validation(User user) {
