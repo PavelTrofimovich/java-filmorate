@@ -54,4 +54,12 @@ public class Mappers {
         genre.setId(rs.getInt("genre_id"));
         return genre;
     }
+
+    public Mpa mapRowToMpa(ResultSet rs, int rowNum) throws SQLException {
+        int id = rs.getInt("mpa_id");
+        String name = rs.getString("name_mpa");
+        Mpa mpa = new Mpa(name);
+        mpa.setId(id);
+        return mpa;
+    }
 }
