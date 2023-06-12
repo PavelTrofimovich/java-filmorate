@@ -9,7 +9,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import java.util.*;
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -20,7 +20,7 @@ public class FilmController {
     private final FilmService filmService;
 
     @GetMapping
-    public ArrayList<Film> getAllFilms() {
+    public List<Film> getAllFilms() {
         log.info("Запрос на получение всех фильмов");
         return filmService.getAllFilms();
     }
